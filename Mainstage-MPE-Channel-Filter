@@ -1,0 +1,98 @@
+/**
+		Channel Filter:
+
+			This script only allows events on the specified channel to be sent. 
+			When changing the Pass Only Channel, the MIDI.allNotesOff() message 
+			is sent, to prevent stuck notes that were sent on the previously
+			selected channel. 
+*/
+
+        
+var CHANNEL_TO_PASS = 1;
+var CHANNEL_TO_SEND = 0;
+var MAIN_CHANNEL = 1;
+var SYNTH_RANGE = 24;
+var LINN_RANGE = 24;
+var RANGE_FACTOR = 1;
+   
+function HandleMIDI(event) {
+		if (event instanceof PitchBend) {
+			event.value == event.value * RANGE_FACTOR;
+			if (event.value > 8191)
+				event.value == 8191;
+			if (event.value < -8192)
+				event.value == -8192;
+		}
+		if (event.channel == CHANNEL_TO_PASS) {
+				if (CHANNEL_TO_SEND != 0) {
+					event.channel == CHANNEL_TO_SEND
+				}
+				event.send();
+		}
+		if (event.channel == MAIN_CHANNEL) {
+				if (CHANNEL_TO_SEND != 0) {
+					event.channel == CHANNEL_TO_SEND
+				}
+				event.send();
+		}
+}
+
+function ParameterChanged (param, value) {
+		if (param === 0) {
+				MAIN_CHANNEL = value;
+				MIDI.allNotesOff();
+		}
+		if (param === 1) {
+				CHANNEL_TO_PASS = value;
+				MIDI.allNotesOff();
+		}
+		if (param === 2) {
+				CHANNEL_TO_SEND = value;
+				MIDI.allNotesOff();
+		}
+		if (param === 3) {
+				SYNTH_RANGE = value;
+				RANGE_FACTOR = LINN_RANGE / SYNTH_RANGE
+		}
+		if (param === 4) {
+				LINN_RANGE = value;
+				RANGE_FACTOR = LINN_RANGE / SYNTH_RANGE
+		}
+}
+
+var PluginParameters = [{
+		name:"Main Channel", 
+		type:"linear", 
+		minValue:0, 
+		maxValue:16, 
+		numberOfSteps:16,
+		defaultValue:1
+}, {
+		name:"Pass Voice Channel", 
+		type:"linear", 
+		minValue:1, 
+		maxValue:16, 
+		numberOfSteps:15,
+		defaultValue:2
+}, {
+		name:"Destination Channel", 
+		type:"linear", 
+		minValue:0, 
+		maxValue:16, 
+		numberOfSteps:16,
+		defaultValue:0
+}, {
+		name:"Synth Bend Range", 
+		type:"linear", 
+		minValue:1, 
+		maxValue:96, 
+		numberOfSteps:95,
+		defaultValue:24
+}, {
+		name:"Linn Bend Range", 
+		type:"linear", 
+		minValue:1, 
+		maxValue:96, 
+		numberOfSteps:95,
+		defaultValue:24
+}];
